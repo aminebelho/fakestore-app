@@ -1,51 +1,48 @@
-import Link from "next/link"
-import { PlusCircle } from "lucide-react"
 import { Suspense } from "react"
+import { getProducts } from "@/lib/api-service"
+import { ProductCard } from "@/components/product/product-card"
+import { Skeleton } from "@/components/ui/skeleton"
 
-import { Button } from "@/components/ui/button"
-import { DataTable } from "@/components/data-table"
-import { columns } from "@/components/product-columns"
-import { getProducts } from "@/lib/products"
-
-// Loading component for Suspense
-function ProductsTableSkeleton() {
-  return (
-    <div className="rounded-md border p-8">
-      <div className="h-[400px] w-full animate-pulse bg-gray-200"></div>
-    </div>
-  )
+export const metadata = {
+  title: "All Products | FakeStore",
+  description: "Browse our collection of products",
 }
 
-// Server component to fetch products
-async function ProductsTable() {
+export default async function ProductsPage() {
   const products = await getProducts()
-  return <DataTable columns={columns} data={products} />
-}
 
-export default function ProductsPage() {
   return (
-    <div className="container mx-auto">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">
-            Browse and manage products from FakeStore API.
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/product/create">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Product
-          </Link>
-        </Button>
+    <div className="container mx-auto py-10 px-4">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
+        <p className="text-muted-foreground">Browse our collection of products</p>
       </div>
 
-      <div className="rounded-md border">
-        <Suspense fallback={<ProductsTableSkeleton />}>
-          <ProductsTable />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <Suspense fallback={<ProductGridSkeleton />}>
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </Suspense>
       </div>
     </div>
   )
+}
+
+function ProductGridSkeleton() {
+  return Array.from({ length: 8 }).map((_, i) => (
+    <div key={i} className="space-y-3">
+      <Skeleton className="h-[300px] w-full rounded-lg" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <div className="flex justify-between">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-4 w-1/4" />
+        </div>
+      </div>
+      <Skeleton className="h-10 w-full rounded-md" />
+    </div>
+  ))
 }
 
